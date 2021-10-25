@@ -1,6 +1,5 @@
-import os
-import pathlib
 import configparser
+import os
 
 
 def read_config(config_paths):
@@ -14,6 +13,4 @@ def read_config(config_paths):
     return config
 
 
-CONFIG = read_config(['./config_test.cfg'])
-
-print(CONFIG['credentials']['path'])
+CONFIG = read_config(['./config.cfg'])

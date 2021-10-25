@@ -34,6 +34,7 @@ class Troop:
 troops = [Troop.from_string(v) for k, v in CONFIG['troops'].items()]
 TROOPS = {troop.name: troop for troop in troops}
 
+
 @dataclass
 class PaymentInfo:
     name: str
@@ -42,6 +43,11 @@ class PaymentInfo:
     _due_date: datetime.date
     amount_czk: str
     iban_account_number: str
+
+    def __post_init__(self):
+        assert len(self.name) > 5
+        assert len(self.variable_symbol) > 2
+        assert int(self.amount_czk) > 0
 
     @property
     def specific_symbol(self):
