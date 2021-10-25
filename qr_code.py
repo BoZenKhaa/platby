@@ -5,13 +5,13 @@ import qrcode
 from payment_info import PaymentInfo
 
 PAYMENT_CODE_TEMPLATE = r"SPD*1.0*ACC:{acc_number}*AM:{amount_czk:.2f}*CC:CZK" \
-                r"*MSG:{message}*X-VS:{vs}*X-SS:{ss}*DT:{due_date}"
+                        r"*MSG:{message}*X-VS:{vs}*X-SS:{ss}*DT:{due_date}"
 
 def qr_platba_string(pi:PaymentInfo):
     """Format from https://qr-platba.cz/"""
-    code = PAYMENT_CODE_TEMPLATE.format(message=pi.name, vs=pi.variable_symbol, ss=pi.specific_symbol,
-                                        acc_number=pi.account_number, amount_czk=pi.amount,
-                                        due_date=pi.due_date)
+    code = PAYMENT_CODE_TEMPLATE.format(message=pi.payment_message, vs=pi.variable_symbol, ss=pi.specific_symbol,
+                                        acc_number=pi.iban_account_number, amount_czk=float(pi.amount_czk),
+                                        due_date=pi.qr_code_due_date)
     return code
 
 
@@ -40,11 +40,4 @@ class QRCode:
         base64_encoded_result_bytes = base64.b64encode(img_bytes)
         base64_encoded_result_str = base64_encoded_result_bytes.decode('ascii')
         return base64_encoded_result_str
-
-
-if __name__ == '__main__':
-    qr_code = QRCode(qr_platba_string("test", 1234, 56789))
-    print(qr_code.base64str())
-    qr_code.save("qr_code_test")
-
 

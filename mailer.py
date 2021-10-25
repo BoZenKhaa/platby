@@ -6,7 +6,7 @@ from google_authentication import GOOGLE_CREDENTIALS
 from googleapiclient.discovery import build
 
 from payment_info import PaymentInfo
-from qr_code import qr_platba_string
+from qr_code import qr_platba_string, QRCode
 
 """ Inspired by
 https://stackoverflow.com/questions/25944883/how-to-send-an-email-through-gmail-without-enabling-insecure-access
@@ -29,12 +29,20 @@ class PaymentEmail:
         self.recipient_email_address = recipient_email_address
 
     def create_email(self):
-        email_text = self.email_template.format(**{k: v for k, v in self.pi.__dict__.items()},
+        qr_code = qr_platba_string(self.pi)
+        email_text = self.email_template.format(payment_message=self.pi.payment_message,
+                                                variable_symbol=self.pi.variable_symbol,
+                                                specific_symbol=self.pi.specific_symbol,
+                                                amount_czk=self.pi.amount_czk,
+                                                human_account_number=self.pi.human_account_number,
+                                                human_due_date=self.pi.human_due_date,
                                                 sender=self.sender_email_address,
                                                 sender_name=self.sender_name,
                                                 recipient=self.recipient_email_address,
                                                 recipient_name=self.pi.name,
-                                                qr_code_base64=qr_platba_string(self.pi))
+                                                cc_name=self.pi.troop.leader_name,
+                                                cc_email=self.pi.troop.leader_email,
+                                                qr_code_base64=QRCode(qr_code).base64str())
         return email_text
 
 

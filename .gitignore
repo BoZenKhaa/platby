@@ -4,7 +4,8 @@ authentication/*
 *.png
 *.txt
 *.eml
-config.ini
+*.cfg
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
