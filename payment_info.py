@@ -37,7 +37,7 @@ TROOPS = {troop.name: troop for troop in troops}
 
 @dataclass
 class PaymentInfo:
-    name: str
+    _name: str
     troop: Troop
     variable_symbol: str
     _due_date: datetime.date
@@ -45,9 +45,13 @@ class PaymentInfo:
     iban_account_number: str
 
     def __post_init__(self):
-        assert len(self.name) > 5
+        assert len(self._name) > 5
         assert len(self.variable_symbol) > 2
         assert int(self.amount_czk) > 0
+
+    @property
+    def name(self):
+        return unidecode(self._name)
 
     @property
     def specific_symbol(self):
