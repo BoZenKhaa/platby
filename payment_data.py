@@ -24,10 +24,17 @@ class NeededColumns:
     email3: str = 'Matka: mail'
     email4: str = 'E-mail (další)'
     email5: str = 'Ostatní: mail'
-    paid: str = '2/2021'
+    payment: str = 'Poplatek 1/2022'
+    payment_sts: str = 'STS'
+    paid: str = 'Zaplaceno'
+    paid_sts: str = 'Zaplaceno STS'
 
     def colnames(self):
         return dataclasses.astuple(self)
+
+    @property
+    def czk_amounts(self):
+        return self.payment, self.payment_sts, self.paid, self.paid_sts
 
     @property
     def emails(self):
@@ -35,22 +42,6 @@ class NeededColumns:
 
 
 NEEDED_COLS = NeededColumns()
-EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
-
-
-# @dataclass
-# class EmailAddress:
-#     label: str
-#     address: str
-#
-#     def is_valid(self):
-#         """
-#         From https://stackoverflow.com/questions/8022530/how-to-check-for-valid-email-address
-#         """
-#         return bool(EMAIL_REGEX.fullmatch(self.address))
-#
-#     def __str__(self):
-#         return f'"{remove_accents(self.label)}" <{self.address}>'
 
 
 def split_and_strip_emails(emails: str, separator=','):
@@ -94,11 +85,16 @@ class PaymentsDataFrame:
         emails = df.apply(get_lists_of_emails, args=(self.cols.emails,), axis=1)
         df = pd.concat([df, emails], axis=1)
 
-        emailable = df.valid_addresses.apply(len) > 0
-        df_with_email = df[emailable]
-        self.df_missing_email = df[~emailable]
+        # TODO: instead of splitting the df into different dataframes for emailable, paid, ..., I could just use one
+        #  dataframes with flags, and filter depending on the flag.
 
-        self.df_emailable_unpaid, self.df_emailable_paid = self.split_unpaid_rows(df_with_email, self.cols.paid)
+        emailable = df.valid_addresses.apply(len) > 0
+        df_with_email = df.loc[emailable]
+        self.df_missing_email = df.loc[~emailable]
+
+        df_with_email = self.convert_currency_columns_to_number_and_fill_na(df_with_email, self.cols)
+
+        self.df_emailable_unpaid, self.df_emailable_paid = self.split_unpaid_rows(df_with_email, self.cols)
 
         n_invalid_addresses = df.invalid_addresses.apply(len).sum()
         logging.info(f"Of {len(df)} people, missing email: {len(self.df_missing_email)},\n"
@@ -114,7 +110,24 @@ class PaymentsDataFrame:
         return df
 
     @staticmethod
-    def split_unpaid_rows(df: pd.DataFrame, paid_col) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def convert_currency_columns_to_number_and_fill_na(df: pd.DataFrame, cols: NeededColumns) -> pd.DataFrame:
+        df_fixed = df.copy()
+        payments = df.loc[:, cols.czk_amounts].fillna(0)
+        for col in cols.czk_amounts:
+            df_fixed.loc[:, col] = pd.to_numeric(payments.loc[:, col])
+        return df_fixed
+
+    @staticmethod
+    def split_unpaid_rows(df: pd.DataFrame, cols: NeededColumns) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        payments = df.loc[:, cols.czk_amounts]
+        paid = (payments.loc[:, cols.paid] + payments.loc[:, cols.paid_sts]) >= \
+               (payments.loc[:, cols.payment] + payments.loc[:, cols.payment_sts])
+        unpaid_df = df[~paid]
+        paid_df = df[paid]
+        return unpaid_df, paid_df
+
+    @staticmethod
+    def split_simple_unpaid_rows(df: pd.DataFrame, paid_col) -> Tuple[pd.DataFrame, pd.DataFrame]:
         empty_payment = df.loc[:, paid_col].isnull()
         unpaid_df = df[empty_payment]
         paid_df = df[~empty_payment]
