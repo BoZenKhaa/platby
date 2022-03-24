@@ -2,6 +2,7 @@ import dataclasses
 import logging
 import re
 from dataclasses import dataclass
+from email.headerregistry import Address
 from typing import Tuple
 
 import pandas as pd
@@ -13,6 +14,7 @@ from mail_encoding import remove_accents
 class NeededColumns:
     """
     Columns in the gooogle sheet
+    TODO: this should be saved differently to allow specifying columns on the fly
     """
     name: str = 'Osoba'
     troop: str = 'Jednotka'
@@ -36,19 +38,19 @@ NEEDED_COLS = NeededColumns()
 EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
 
 
-@dataclass
-class EmailAddress:
-    label: str
-    address: str
-
-    def is_valid(self):
-        """
-        From https://stackoverflow.com/questions/8022530/how-to-check-for-valid-email-address
-        """
-        return bool(EMAIL_REGEX.fullmatch(self.address))
-
-    def __str__(self):
-        return f'"{remove_accents(self.label)}" <{self.address}>'
+# @dataclass
+# class EmailAddress:
+#     label: str
+#     address: str
+#
+#     def is_valid(self):
+#         """
+#         From https://stackoverflow.com/questions/8022530/how-to-check-for-valid-email-address
+#         """
+#         return bool(EMAIL_REGEX.fullmatch(self.address))
+#
+#     def __str__(self):
+#         return f'"{remove_accents(self.label)}" <{self.address}>'
 
 
 def split_and_strip_emails(emails: str, separator=','):
@@ -58,26 +60,27 @@ def split_and_strip_emails(emails: str, separator=','):
 
 def get_lists_of_emails(row: pd.Series, email_cols) -> pd.Series:
     # 'emails' string can contain multiple addresses. Get all non-empty emails
-    emails_list = ((col, emails)
-                   for col, emails in
-                   zip(email_cols, row[email_cols].values)
-                   if emails)  # if email not None or ''
+    raw_addresses_list = ((col, emails)
+                          for col, emails in
+                          zip(email_cols, row[email_cols].values)
+                          if emails)  # if email not None or ''
 
-    # split multiple emails in one string and strip whitespace
-    email_list = tuple(EmailAddress(col, email) for col, emails in emails_list
-                  for email in split_and_strip_emails(emails))
+    address_list = []
+    invalid_emails = []
+    for col, addresses in raw_addresses_list:
+        # split multiple emails in one string and strip whitespace
+        for email in split_and_strip_emails(addresses):
+            try:
+                address = Address(col, addr_spec=email)
+                # don't add duplicate email addresses
+                if address.addr_spec not in [addr.addr_spec for addr in address_list]:
+                    address_list.append(address)
+            except ValueError as e:
+                logging.warning(f"Incorrect email address read: '{col}': '{email}'; {e}")
+                invalid_emails.append((col, email))
 
-    # remove duplicates
-    # reverse order so that the values first in the list are not removed when removing duplicates
-    unique = {email.address: email for email in reversed(email_list)}
-    unique_emails = unique.values()
-
-    # split into two lists, valid and invalid emails
-    valid_emails = (email for email in unique_emails if email.is_valid())
-    invalid_emails = (email for email in unique_emails if not email.is_valid())
-
-    new_row = pd.Series([tuple(valid_emails), tuple(invalid_emails)])
-    new_row.index = ['valid_emails', 'invalid_emails']
+    new_row = pd.Series([tuple(address_list), tuple(invalid_emails)])
+    new_row.index = ['valid_addresses', 'invalid_addresses']
     return new_row
 
 
@@ -91,17 +94,17 @@ class PaymentsDataFrame:
         emails = df.apply(get_lists_of_emails, args=(self.cols.emails,), axis=1)
         df = pd.concat([df, emails], axis=1)
 
-        emailable = df.valid_emails.apply(len) > 0
+        emailable = df.valid_addresses.apply(len) > 0
         df_with_email = df[emailable]
         self.df_missing_email = df[~emailable]
 
         self.df_emailable_unpaid, self.df_emailable_paid = self.split_unpaid_rows(df_with_email, self.cols.paid)
 
-        n_invalid_emails = df.invalid_emails.apply(len).sum()
+        n_invalid_addresses = df.invalid_addresses.apply(len).sum()
         logging.info(f"Of {len(df)} people, missing email: {len(self.df_missing_email)},\n"
                      f"\temailable paid: {len(self.df_emailable_paid)}\n"
                      f"\temailable unpaid: {len(self.df_emailable_unpaid)}.\n "
-                     f"Also there were {n_invalid_emails} invalid emails.")
+                     f"Also there were {n_invalid_addresses} invalid emails.")
 
     @staticmethod
     def prepare_needed_columns(df: pd.DataFrame, cols: NeededColumns) -> pd.DataFrame:
