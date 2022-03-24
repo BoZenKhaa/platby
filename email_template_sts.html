@@ -1,0 +1,34 @@
+<html><head>
+    <meta charset="utf-8">
+</head>
+<body style="font-family: Segoe UI, sans-serif; font-size: 12pt;">
+    <div>Ahoj,</div>
+
+    <div>prosím o zaplacení poplatku za STS podle platebních údajů níže. Platby jsou na nový transparentní účet, přijetí platby si můžeš zkontrolovat <a href="https://ib.fio.cz/ib/transparent?a=2101999393">na webu fiobanky</a>.</div>
+
+    <div style="background: ghostwhite;
+        font-size: 18px;
+        padding: 10px;
+        border: 1px ghostwhite;
+        margin: 10px;">
+        <div><b>Informace k platbě
+        </b></div><div> Účel platby/Poznámka: {payment_message}
+        </div><div> Číslo účtu: {human_account_number}
+        </div><div> Platba: {amount_czk} Kč
+        </div><div> Datum splatnosti: {human_due_date}
+        </div><div> VS: {variable_symbol}
+        </div><div> SS: {specific_symbol}
+        </div><div><img src="cid:{qr_code_cid}" alt="QR kód s platebními údaji"></div>
+    </div>
+
+    <div><br/></div><div><b>Výše poplatku</b></div>
+    <div>Poplatek za jedno telefoní číslo v STS je 200 Kč. Podle skautisu máš čísel: {number_of_sts_phones}. Od platby výše jsou již odečtené přijaté platby.</div>
+
+    <div><br /></div><div>Pro zrychlení platby jsme připravili QR kód, který lze použít při placení v mobilních aplikacích bank. Použití QR kódu šetří váš čas a snižuje pravděpodobnost překlepu. </div>
+
+    <div><br/></div><div>Pokud ti tento email přišel a ty STS nemáš, nebo máš už zaplaceno, dej mi prosím vědět! </div>
+
+    <div><br /></div><div>S poděkováním,</div>
+    <div>Hondzik - Jan Mrkos, vedoucí 4. přístavu</div>
+    </body>
+</html>

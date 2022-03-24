@@ -7,6 +7,7 @@ from typing import Tuple
 
 import pandas as pd
 
+from config import CONFIG
 from mail_encoding import remove_accents
 
 
@@ -24,24 +25,19 @@ class NeededColumns:
     email3: str = 'Matka: mail'
     email4: str = 'E-mail (další)'
     email5: str = 'Ostatní: mail'
-    payment: str = 'Poplatek 1/2022'
-    payment_sts: str = 'STS'
-    paid: str = 'Zaplaceno'
-    paid_sts: str = 'Zaplaceno STS'
+    amount_due: str = CONFIG['sheet_columns']['amount_due']
+    amount_paid: str = CONFIG['sheet_columns']['amount_paid']
 
     def colnames(self):
         return dataclasses.astuple(self)
 
     @property
     def czk_amounts(self):
-        return self.payment, self.payment_sts, self.paid, self.paid_sts
+        return self.amount_due, self.amount_paid
 
     @property
     def emails(self):
         return [self.email1, self.email3, self.email2, self.email4, self.email5]
-
-
-NEEDED_COLS = NeededColumns()
 
 
 def split_and_strip_emails(emails: str, separator=','):
@@ -104,7 +100,8 @@ class PaymentsDataFrame:
 
     @staticmethod
     def prepare_needed_columns(df: pd.DataFrame, cols: NeededColumns) -> pd.DataFrame:
-        assert set(cols.colnames()).issubset(df.columns)
+        assert set(cols.colnames()).issubset(df.columns), \
+            f"Sheets don't have the needed column: {set(cols.colnames()) - set(df.columns)} (have following: \n {df.columns})"
         df = df.loc[:, cols.colnames()]
         df.replace({'': None}, inplace=True)
         return df
@@ -120,8 +117,7 @@ class PaymentsDataFrame:
     @staticmethod
     def split_unpaid_rows(df: pd.DataFrame, cols: NeededColumns) -> Tuple[pd.DataFrame, pd.DataFrame]:
         payments = df.loc[:, cols.czk_amounts]
-        paid = (payments.loc[:, cols.paid] + payments.loc[:, cols.paid_sts]) >= \
-               (payments.loc[:, cols.payment] + payments.loc[:, cols.payment_sts])
+        paid = payments.loc[:, cols.amount_paid] >= payments.loc[:, cols.amount_due]
         unpaid_df = df[~paid]
         paid_df = df[paid]
         return unpaid_df, paid_df

@@ -4,12 +4,11 @@ import pandas as pd
 from unidecode import unidecode
 
 from config import CONFIG
-from payment_data import NEEDED_COLS
+from payment_data import NeededColumns
 
 IBAN_ACC_NUMBER = CONFIG['payment']['iban']
-AMOUNT_CZK = CONFIG['payment']['amount_czk']
 SS_PREFIX = CONFIG['payment']['ss_prefix']
-DUE_DATE = datetime.date.today() + datetime.timedelta(days=10)
+DUE_DATE = datetime.date.today() + datetime.timedelta(days=6)
 PAYMENT_MESSAGE = CONFIG['payment']['message_template']
 
 
@@ -43,6 +42,8 @@ class PaymentInfo:
     _due_date: datetime.date
     amount_czk: str
     iban_account_number: str
+    _amount_due: str
+    _amount_paid: str
 
     def __post_init__(self):
         assert len(self._name) > 5
@@ -95,12 +96,22 @@ class PaymentInfo:
     def human_due_date(self):
         return self._due_date.strftime("%d. %m. %Y")
 
+    @property
+    def number_of_sts_phones(self):
+        if CONFIG.has_section('sts'):
+            return str(int(int(self._amount_due)/int(CONFIG.get('sts', 'STS_payment_per_number'))))
+        else:
+            raise ValueError("Number of STS phones should only be checked with STS settings")
+
     @classmethod
-    def from_df_row(cls, row: pd.Series):
-        troop = TROOPS[row.loc[NEEDED_COLS.troop]]
-        return cls(row.loc[NEEDED_COLS.name],
+    def from_df_row(cls, row: pd.Series, needed_cols: NeededColumns):
+        troop = TROOPS[row.loc[needed_cols.troop]]
+        amount_czk = row.loc[needed_cols.amount_due] - row.loc[needed_cols.amount_paid]
+        return cls(row.loc[needed_cols.name],
                    troop,
-                   row.loc[NEEDED_COLS.reg_num],
+                   row.loc[needed_cols.reg_num],
                    DUE_DATE,
-                   AMOUNT_CZK,
-                   IBAN_ACC_NUMBER)
+                   amount_czk,
+                   IBAN_ACC_NUMBER,
+                   row.loc[needed_cols.amount_due],
+                   row.loc[needed_cols.amount_paid])

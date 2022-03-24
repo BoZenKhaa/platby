@@ -33,8 +33,8 @@ class Sheets:
         return [prop['properties']['title'] for prop in properties]
 
     def get_dataframe(self, sheet_name: str,
-                      colnames_range: str = "A1:Z",
-                      values_range: str = "A2:Z"):
+                      colnames_range: str = "A1:AZ",
+                      values_range: str = "A2:AZ"):
         column_names = self.service.spreadsheets().values().get(spreadsheetId=self.sheet_id,
                                                                 range=f"'{sheet_name}'!{colnames_range}").execute()
         values = self.service.spreadsheets().values().get(spreadsheetId=self.sheet_id,
