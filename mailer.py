@@ -54,13 +54,14 @@ class PaymentEmail:
         msg['Cc'] = ccs
 
         qr_code_cid = make_msgid()
+        # we needed to peel the <> off the msgid for use in the html.
         html_message = MESSAGE_HTML_TEMPLATE.format(payment_message=pi.payment_message,
                                                     variable_symbol=pi.variable_symbol,
                                                     specific_symbol=pi.specific_symbol,
                                                     amount_czk=pi.amount_czk,
                                                     human_account_number=pi.human_account_number,
                                                     human_due_date=pi.human_due_date,
-                                                    qr_code_cid=qr_code_cid)
+                                                    qr_code_cid=qr_code_cid[1:-1])
 
         msg.set_content(html2text.html2text(html_message))
         msg.add_alternative(html_message, subtype='html')
