@@ -65,7 +65,8 @@ class PaymentEmail:
         if CONFIG.has_section('sts'):
             usecase_specific_kwargs = dict(number_of_sts_phones=pi.number_of_sts_phones)
 
-        html_message = MESSAGE_HTML_TEMPLATE.format(payment_message=pi.payment_message,
+        html_message = MESSAGE_HTML_TEMPLATE.format(troop=pi.troop.name,
+                                                    payment_message=pi.payment_message,
                                                     variable_symbol=pi.variable_symbol,
                                                     specific_symbol=pi.specific_symbol,
                                                     amount_czk=pi.amount_czk,

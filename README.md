@@ -9,7 +9,7 @@ Velmi stručně:
 1. Vytvoř google tabulku s emaily, např. exportem ze skautisu.
 2. Povol připojení aplikaci k tabulce (viz níže)
 3. Vytvoř nastavení platby v souboru `config.cfg` podle příkladu. 
-4. Vytvoř template emailu v některém emailovém klientu a ulož ho do souboru `email_template.eml`. V templatu lze používat názvy proměných ve složených závorkách `{promena}`.
+4. Vytvoř html template textu emailu ulož ho do souboru  např. `html_email_template.html`. V templatu lze používat názvy proměných ve složených závorkách `{promena}`.
 5. Vytvoř a rozešli emaily pomocí Jupyter notebooku `prispevky.ipynb`.
 
 ### Vytvoření přihlašovacích údajů k google api pro čtení tabulek a posílání emailů
