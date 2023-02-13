@@ -101,8 +101,8 @@ class Mailer:
             raise
 
     @staticmethod
-    def encode_email_to_gmail_message(email_str: str):
-        b = base64.urlsafe_b64encode(email_str.encode('utf-8'))
+    def encode_email_to_gmail_message(email: EmailMessage):
+        b = base64.urlsafe_b64encode(email.as_bytes())
         gmail_message = {'raw': b.decode('utf-8')}
         return gmail_message
 
