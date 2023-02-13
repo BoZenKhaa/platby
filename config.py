@@ -13,5 +13,6 @@ def read_config(config_paths):
     return config
 
 
-CONFIG_FILEPATH = './config_prispevky.cfg'
+# CONFIG_FILEPATH = './config_prispevky.cfg'
+CONFIG_FILEPATH = './config_sts.cfg'
 CONFIG = read_config([CONFIG_FILEPATH,])

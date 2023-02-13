@@ -29,7 +29,7 @@ class QRCode:
     def get_image_bytes(self):
         # Save to memory buffer
         in_mem_file = io.BytesIO()
-        self.img.save(in_mem_file, format="PNG")
+        self.img.save(in_mem_file)
 
         # reset file pointer to start
         in_mem_file.seek(0)
