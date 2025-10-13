@@ -41,7 +41,7 @@ def load_or_generate_credentials(scopes, credentials_file=CREDENTIALS):
                 credentials_file, scopes)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
-        with open('authentication/token.json', 'w') as token:
+        with open('authentication/token.json', 'wt', encoding='utf-8') as token:
             token.write(creds.to_json())
     return creds
 
