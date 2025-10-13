@@ -1,0 +1,1 @@
+See personal wiki: SkautskePrispevky.md

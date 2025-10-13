@@ -5,7 +5,7 @@ import os
 def read_config(config_paths):
     config = configparser.ConfigParser()
 
-    read_configs = config.read(config_paths)
+    read_configs = config.read(config_paths, encoding='utf-8')
     if read_configs:
         print("Succesfully read config from: {}".format(str(read_configs)))
     else:
