@@ -1,14 +1,12 @@
 import dataclasses
 import logging
-import re
 from dataclasses import dataclass
 from email.headerregistry import Address
 from typing import Tuple
 
 import pandas as pd
 
-from config import CONFIG
-from mail_encoding import remove_accents
+from prispevky.config import CONFIG
 
 
 @dataclass(order=True)

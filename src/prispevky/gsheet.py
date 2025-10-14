@@ -3,8 +3,8 @@ from __future__ import print_function
 import pandas as pd
 from googleapiclient.discovery import build
 
-from config import CONFIG
-from google_authentication import GOOGLE_CREDENTIALS
+from prispevky.config import CONFIG
+from prispevky.google_authentication import GOOGLE_CREDENTIALS
 
 # The ID and range of a sample spreadsheet.
 SPREADSHEET_ID = CONFIG['spreadsheet']['id']

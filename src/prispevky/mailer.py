@@ -4,17 +4,18 @@ from googleapiclient import errors
 import base64
 import logging
 
-from config import CONFIG
-from google_authentication import GOOGLE_CREDENTIALS
+from prispevky.config import CONFIG
+from prispevky.google_authentication import GOOGLE_CREDENTIALS
 from googleapiclient.discovery import build
 
-from payment_info import PaymentInfo
-from qr_code import qr_platba_string, QRCode
+from prispevky.payment_info import PaymentInfo
+from prispevky.qr_code import qr_platba_string, QRCode
 
 from email.message import EmailMessage
 from email.headerregistry import Address
 from email.utils import make_msgid
 import html2text as html2text
+import importlib.resources as resources
 
 """ Inspired by
 https://stackoverflow.com/questions/25944883/how-to-send-an-email-through-gmail-without-enabling-insecure-access
@@ -24,7 +25,7 @@ https://docs.python.org/3/library/email.examples.html
 
 SENDER = Address(CONFIG['mailer']['sender_name'], addr_spec=CONFIG['mailer']['sender_address'])
 SUBJECT = CONFIG['mailer']['subject']
-with open(CONFIG['mailer']['html_template'], 'rt', encoding="utf-8") as f:
+with open(resources.files('prispevky.templates')/CONFIG['mailer']['html_template'], 'rt', encoding="utf-8") as f:
     MESSAGE_HTML_TEMPLATE = f.read()
 
 

@@ -1,5 +1,6 @@
 import configparser
 import os
+import importlib.resources as resources
 
 
 def read_config(config_paths):
@@ -13,6 +14,6 @@ def read_config(config_paths):
     return config
 
 
-CONFIG_FILEPATH = './config_prispevky.cfg'
-# CONFIG_FILEPATH = './config_test.cfg'
+CONFIG_FILEPATH =  resources.files('prispevky.cfg')/'config_prispevky.cfg'
+# CONFIG_FILEPATH = './cfg/config_test.cfg'
 CONFIG = read_config([CONFIG_FILEPATH,])

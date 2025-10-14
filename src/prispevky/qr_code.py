@@ -2,7 +2,7 @@ import base64
 import io
 import qrcode
 
-from payment_info import PaymentInfo
+from prispevky.payment_info import PaymentInfo
 
 PAYMENT_CODE_TEMPLATE = r"SPD*1.0*ACC:{acc_number}*AM:{amount_czk:.2f}*CC:CZK" \
                         r"*MSG:{message}*X-VS:{vs}*X-SS:{ss}"

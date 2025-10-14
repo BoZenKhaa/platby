@@ -3,8 +3,8 @@ from dataclasses import dataclass
 import pandas as pd
 from unidecode import unidecode
 
-from config import CONFIG
-from payment_data import NeededColumns
+from prispevky.config import CONFIG
+from prispevky.payment_data import NeededColumns
 
 IBAN_ACC_NUMBER = CONFIG['payment']['iban']
 SS_PREFIX = CONFIG['payment']['ss_prefix']

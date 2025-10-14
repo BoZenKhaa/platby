@@ -1,10 +1,9 @@
 # Project specific
-authentication/*
+src/prispevky/authentication/*
 .idea
 *.png
 *.txt
 *.eml
-*.cfg
 
 
 # Byte-compiled / optimized / DLL files
